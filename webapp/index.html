@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zito - 디지털 명함 서비스</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Noto Sans KR', sans-serif; }
+        
+        /* Modal animations */
+        .modal-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show { opacity: 1; }
+        
+        .modal-content {
+            transform: scale(0.95) translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Page transitions */
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        /* Input focus styles */
+        input:focus {
+            outline: none;
+            border-color: #000 !important;
+        }
+        
+        /* Smooth scroll */
+        html { scroll-behavior: smooth; }
+        
+        /* Logo styling */
+        .zito-logo {
+            font-family: 'Arial Black', sans-serif;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: -1px;
+        }
+    </style>
+</head>
+<body class="bg-white min-h-screen">
+    <!-- Header Navigation -->
+    <header id="header" class="fixed top-0 left-0 right-0 bg-black text-white z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <!-- Logo -->
+                <a href="#" onclick="navigateTo('home')" class="flex items-center">
+                    <img src="assets/zito_logo_2.png" alt="Zito" class="h-7" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="zito-logo text-2xl text-white hidden">Zito</span>
+                </a>
+                
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <span class="text-gray-400 px-2">|</span>
+                    <a href="#" onclick="navigateTo('plan-free')" class="px-3 py-2 text-sm hover:text-gray-300 transition">플랜</a>
+                    <span class="text-gray-400 px-1">|</span>
+                    <a href="#" onclick="navigateTo('plan-free')" class="px-3 py-2 text-sm hover:text-gray-300 transition">무료</a>
+                    <a href="#" onclick="navigateTo('plan-pro')" class="px-3 py-2 text-sm hover:text-gray-300 transition">PRO</a>
+                    <a href="#" onclick="navigateTo('plan-b2b')" class="px-3 py-2 text-sm hover:text-gray-300 transition">B2B</a>
+                    <a href="#" onclick="navigateTo('inquiry')" class="px-4 py-2 text-sm hover:text-gray-300 transition ml-4">도입문의</a>
+                    <a href="#" onclick="navigateTo('store')" class="px-4 py-2 text-sm hover:text-gray-300 transition border-b-2 border-transparent hover:border-white">스토어</a>
+                </nav>
+                
+                <!-- Auth Buttons -->
+                <div class="flex items-center space-x-4">
+                    <div id="auth-buttons" class="flex items-center space-x-3">
+                        <!-- Dashboard button (PRO/B2B only) - hidden by default -->
+                        <a href="#" id="dashboard-btn" onclick="navigateTo('dashboard')" class="hidden px-4 py-2 text-sm hover:text-gray-300 transition">대시보드</a>
+                        <button onclick="openLoginModal()" id="login-btn" class="px-4 py-2 text-sm hover:text-gray-300 transition">로그인</button>
+                        <button onclick="openSignupModal()" id="signup-btn" class="px-4 py-2 text-sm hover:text-gray-300 transition">회원가입</button>
+                        <!-- Logout button - hidden by default -->
+                        <button onclick="handleLogout()" id="logout-btn" class="hidden px-4 py-2 text-sm hover:text-gray-300 transition">로그아웃</button>
+                    </div>
+                    
+                    <!-- Mobile menu button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-black border-t border-gray-800">
+            <div class="px-4 py-3 space-y-2">
+                <a href="#" onclick="navigateTo('plan-free'); toggleMobileMenu();" class="block py-2 text-sm">무료</a>
+                <a href="#" onclick="navigateTo('plan-pro'); toggleMobileMenu();" class="block py-2 text-sm">PRO</a>
+                <a href="#" onclick="navigateTo('plan-b2b'); toggleMobileMenu();" class="block py-2 text-sm">B2B</a>
+                <a href="#" onclick="navigateTo('inquiry'); toggleMobileMenu();" class="block py-2 text-sm">도입문의</a>
+                <a href="#" onclick="navigateTo('store'); toggleMobileMenu();" class="block py-2 text-sm">스토어</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-14">
+        <!-- Home Page -->
+        <div id="page-home" class="page active">
+            <section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                <div class="text-center px-4">
+                    <img src="assets/zito_logo_2.png" alt="Zito" class="h-24 mx-auto mb-8" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <h1 class="zito-logo text-6xl text-black mb-8 hidden">Zito</h1>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">나만의 디지털 명함</h2>
+                    <p class="text-lg text-gray-600 mb-8">공유와 실사용이 가능한 진짜 무료 디지털 명함</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="openSignupModal()" class="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition">
+                            무료로 시작하기
+                        </button>
+                        <button onclick="navigateTo('plan-free')" class="px-8 py-3 border-2 border-black text-black rounded-lg font-semibold hover:bg-black hover:text-white transition">
+                            플랜 살펴보기
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Plan Free Page -->
+        <div id="page-plan-free" class="page">
+            <section class="min-h-screen py-20 px-4">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-4xl font-bold text-center mb-4">무료 플랜</h1>
+                    <p class="text-gray-600 text-center mb-12">핵심 유입 채널 - 진짜 무료 디지털 명함</p>
+                    
+                    <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200">
+                        <div class="text-center mb-8">
+                            <span class="text-5xl font-bold">₩0</span>
+                            <span class="text-gray-500">/월</span>
+                        </div>
+                        
+                        <h3 class="font-semibold text-lg mb-4">기능</h3>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span>명함 1장 생성 (기본 정보, 한글/영문, SNS·포트폴리오 링크, 프로필 사진)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span>QR / 링크 / NFC(카드)로 무제한 공유</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span>조회수 기본 통계</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span>간단한 명함첩 (무제한)</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="bg-blue-50 rounded-lg p-4 mb-8">
+                            <p class="text-sm text-blue-800">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Slice는 개인도 연 구독료를 내야 실사용 기능을 쓸 수 있지만, Zito는 공유와 실사용이 가능한 진짜 무료!
+                            </p>
+                        </div>
+                        
+                        <button onclick="openSignupModal()" class="w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition">
+                            무료로 시작하기
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Plan PRO Page -->
+        <div id="page-plan-pro" class="page">
+            <section class="min-h-screen py-20 px-4">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-4xl font-bold text-center mb-4">PRO 플랜</h1>
+                    <p class="text-gray-600 text-center mb-12">관계 관리에 특화된 개인 플랜</p>
+                    
+                    <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-black">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-black text-white text-xs px-3 py-1 rounded-full">인기</span>
+                        </div>
+                        
+                        <div class="text-center mb-8">
+                            <span class="text-5xl font-bold">₩2,900</span>
+                            <span class="text-gray-500">/월</span>
+                            <p class="text-sm text-gray-500 mt-2">연 ₩32,000 (Slice의 절반 가격)</p>
+                        </div>
+                        
+                        <h3 class="font-semibold text-lg mb-4">기능</h3>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>멀티 명함</strong>: 직장용 / 프리랜서용 / 사이드프로젝트용 등 최대 5개</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>디자인 강화</strong>: 로고 업로드, 템플릿 고급화, 커스터마이즈</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>관계 관리</strong>: 메모, 태그(업종, 이벤트명), 후속 알림(팔로업 리마인더)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>고급 통계</strong>: 링크별 클릭 수, 조회 시간대 리포트</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span>광고 제거</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="bg-yellow-50 rounded-lg p-4 mb-8">
+                            <p class="text-sm text-yellow-800">
+                                <i class="fas fa-star mr-2"></i>
+                                Slice보다 저렴하면서 관계 유지/팔로업 도구에 특화!
+                            </p>
+                        </div>
+                        
+                        <button onclick="openSignupModal()" class="w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition">
+                            PRO 시작하기
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Plan B2B Page -->
+        <div id="page-plan-b2b" class="page">
+            <section class="min-h-screen py-20 px-4">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-4xl font-bold text-center mb-4">B2B 플랜</h1>
+                    <p class="text-gray-600 text-center mb-12">팀·조직을 위한 기업용 솔루션</p>
+                    
+                    <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200">
+                        <div class="text-center mb-8">
+                            <span class="text-5xl font-bold">맞춤 견적</span>
+                            <p class="text-sm text-gray-500 mt-2">인원 수에 따른 합리적인 가격</p>
+                        </div>
+                        
+                        <h3 class="font-semibold text-lg mb-4">공통 기능</h3>
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>회사 브랜딩 템플릿</strong>: 로고, 브랜드 컬러, 폰트</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>직원 명함 일괄 발급</strong>, 입·퇴사 시 자동 회수·전환</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>회사 도메인 링크</strong>: card.company.com/이름</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>팀/조직 대시보드</strong>: 인원별 명함 조회수, 이벤트별 교환 수, 전체 리드 추이</span>
+                            </li>
+                        </ul>
+                        
+                        <h3 class="font-semibold text-lg mb-4">B2B 추가 기능</h3>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>CRM 연동</strong>: HubSpot, Notion DB, Google Sheets</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                                <span><strong>팀용 파이프라인 뷰</strong>: 잠재고객 연결 현황 추적</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="bg-purple-50 rounded-lg p-4 mb-8">
+                            <p class="text-sm text-purple-800">
+                                <i class="fas fa-building mr-2"></i>
+                                명함 기반 리드 관리·세일즈 툴로 팀 세일즈/마케팅 파이프라인 관리!
+                            </p>
+                        </div>
+                        
+                        <button onclick="navigateTo('inquiry')" class="w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition">
+                            도입 문의하기
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Inquiry Page -->
+        <div id="page-inquiry" class="page">
+            <section class="min-h-screen py-20 px-4">
+                <div class="max-w-2xl mx-auto">
+                    <h1 class="text-4xl font-bold text-center mb-4">도입문의</h1>
+                    <p class="text-gray-600 text-center mb-12">B2B 솔루션 도입을 위한 상담 신청</p>
+                    
+                    <form id="inquiry-form" class="bg-white rounded-2xl shadow-lg p-8">
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">회사명 *</label>
+                                <input type="text" id="inquiry-company" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-black transition">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">담당자명 *</label>
+                                <input type="text" id="inquiry-name" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-black transition">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">이메일 *</label>
+                                <input type="email" id="inquiry-email" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-black transition">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">연락처 *</label>
+                                <input type="tel" id="inquiry-phone" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-black transition">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">예상 인원 수</label>
+                                <select id="inquiry-size" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-black transition">
+                                    <option value="">선택해주세요</option>
+                                    <option value="1-10">1-10명</option>
+                                    <option value="11-50">11-50명</option>
+                                    <option value="51-100">51-100명</option>
+                                    <option value="100+">100명 이상</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">문의 내용</label>
+                                <textarea id="inquiry-message" rows="4" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-black transition resize-none"
+                                    placeholder="궁금한 점이나 요청사항을 자유롭게 적어주세요."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition">
+                                문의 신청하기
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <!-- Store Page -->
+        <div id="page-store" class="page">
+            <section class="min-h-screen py-20 px-4">
+                <div class="max-w-6xl mx-auto">
+                    <h1 class="text-4xl font-bold text-center mb-4">스토어</h1>
+                    <p class="text-gray-600 text-center mb-12">NFC 카드 및 액세서리</p>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Product Card 1 -->
+                        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                            <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                <i class="fas fa-id-card text-6xl text-gray-400"></i>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-semibold text-lg mb-2">Zito NFC 카드 - 클래식</h3>
+                                <p class="text-gray-600 text-sm mb-4">심플하고 세련된 기본 NFC 명함 카드</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xl font-bold">₩15,000</span>
+                                    <button class="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition">
+                                        구매하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product Card 2 -->
+                        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                            <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                <i class="fas fa-id-card text-6xl text-gray-400"></i>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-semibold text-lg mb-2">Zito NFC 카드 - 프리미엄</h3>
+                                <p class="text-gray-600 text-sm mb-4">메탈 소재의 프리미엄 NFC 명함 카드</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xl font-bold">₩35,000</span>
+                                    <button class="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition">
+                                        구매하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product Card 3 -->
+                        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                            <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                <i class="fas fa-ring text-6xl text-gray-400"></i>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-semibold text-lg mb-2">Zito NFC 링</h3>
+                                <p class="text-gray-600 text-sm mb-4">손가락에 끼는 스마트 NFC 링</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xl font-bold">₩45,000</span>
+                                    <button class="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition">
+                                        구매하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Dashboard Page (PRO/B2B only) -->
+        <div id="page-dashboard" class="page">
+            <section class="min-h-screen py-20 px-4">
+                <div class="max-w-6xl mx-auto">
+                    <h1 class="text-4xl font-bold mb-4">대시보드</h1>
+                    <p class="text-gray-600 mb-8" id="dashboard-user-info">환영합니다!</p>
+                    
+                    <!-- Stats Overview -->
+                    <div class="grid md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">총 조회수</p>
+                                    <p class="text-2xl font-bold">1,234</p>
+                                </div>
+                                <i class="fas fa-eye text-2xl text-blue-500"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">명함 공유</p>
+                                    <p class="text-2xl font-bold">56</p>
+                                </div>
+                                <i class="fas fa-share text-2xl text-green-500"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">저장된 연락처</p>
+                                    <p class="text-2xl font-bold">89</p>
+                                </div>
+                                <i class="fas fa-address-book text-2xl text-purple-500"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">팔로업 예정</p>
+                                    <p class="text-2xl font-bold">12</p>
+                                </div>
+                                <i class="fas fa-bell text-2xl text-yellow-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- My Cards Section -->
+                    <div class="bg-white rounded-xl shadow p-6 mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-semibold">내 명함</h2>
+                            <button class="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition">
+                                <i class="fas fa-plus mr-2"></i>새 명함 만들기
+                            </button>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="border rounded-lg p-4 hover:border-black transition cursor-pointer">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold">직장용 명함</p>
+                                        <p class="text-sm text-gray-500">기본 명함</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">조회 123회</span>
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">공유 45회</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-dashed rounded-lg p-4 hover:border-black transition cursor-pointer flex items-center justify-center text-gray-400">
+                                <div class="text-center">
+                                    <i class="fas fa-plus text-2xl mb-2"></i>
+                                    <p class="text-sm">새 명함 추가</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <h2 class="text-xl font-semibold mb-6">최근 활동</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-eye text-blue-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm">누군가 명함을 조회했습니다</p>
+                                    <p class="text-xs text-gray-500">2분 전</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-address-book text-green-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm">새 연락처가 명함첩에 추가되었습니다</p>
+                                    <p class="text-xs text-gray-500">1시간 전</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-bell text-yellow-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm">김철수님에게 팔로업 할 시간입니다</p>
+                                    <p class="text-xs text-gray-500">오늘 오후 3시</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-8">
+                <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+                
+                <div class="text-center mb-8">
+                    <img src="assets/zito_logo_2.png" alt="Zito" class="h-16 mx-auto mb-6" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <h2 class="zito-logo text-3xl text-black mb-6 hidden">Zito</h2>
+                    <h3 class="text-2xl font-bold">지금 바로 시작해보세요</h3>
+                    <p class="text-gray-600 mt-2">나만의 디지털 명함을 만들어보세요.</p>
+                </div>
+                
+                <form id="login-form" class="space-y-4">
+                    <input type="email" id="login-email" placeholder="이메일 또는 아이디" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-black transition">
+                    <input type="password" id="login-password" placeholder="비밀번호" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-black transition">
+                    
+                    <button type="submit" class="w-full py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition">
+                        로그인
+                    </button>
+                </form>
+                
+                <div class="flex items-center gap-4 my-6">
+                    <div class="flex-1 h-px bg-gray-300"></div>
+                    <span class="text-sm text-gray-500">SNS 로그인</span>
+                    <div class="flex-1 h-px bg-gray-300"></div>
+                </div>
+                
+                <div class="flex justify-center gap-5">
+                    <button onclick="signInWithApple()" class="w-14 h-14 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition">
+                        <i class="fab fa-apple text-white text-2xl"></i>
+                    </button>
+                    <button onclick="signInWithGoogle()" class="w-14 h-14 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50 transition">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-7 h-7">
+                    </button>
+                </div>
+                
+                <div class="text-center mt-6">
+                    <button onclick="switchToSignup()" class="text-sm text-gray-600 underline hover:text-black">
+                        회원가입
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signup-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <button onclick="closeSignupModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+                
+                <div class="text-center mb-8">
+                    <img src="assets/zito_logo_2.png" alt="Zito" class="h-12 mx-auto mb-4" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <h2 class="zito-logo text-2xl text-black mb-4 hidden">Zito</h2>
+                    <h3 class="text-2xl font-bold">회원가입</h3>
+                </div>
+                
+                <form id="signup-form" class="space-y-4">
+                    <input type="text" id="signup-name" placeholder="이름" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-black transition">
+                    <input type="email" id="signup-email" placeholder="이메일" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-black transition">
+                    <input type="password" id="signup-password" placeholder="비밀번호" required minlength="6"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-black transition">
+                    <input type="password" id="signup-confirm-password" placeholder="비밀번호 확인" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-black transition">
+                    
+                    <button type="submit" class="w-full py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition">
+                        가입하기
+                    </button>
+                </form>
+                
+                <div class="flex items-center gap-4 my-6">
+                    <div class="flex-1 h-px bg-gray-300"></div>
+                    <span class="text-sm text-gray-500">SNS 회원가입</span>
+                    <div class="flex-1 h-px bg-gray-300"></div>
+                </div>
+                
+                <div class="flex justify-center gap-5">
+                    <button onclick="signInWithApple()" class="w-14 h-14 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition">
+                        <i class="fab fa-apple text-white text-2xl"></i>
+                    </button>
+                    <button onclick="signInWithGoogle()" class="w-14 h-14 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50 transition">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-7 h-7">
+                    </button>
+                </div>
+                
+                <div class="text-center mt-6">
+                    <button onclick="switchToLogin()" class="text-sm text-gray-600 underline hover:text-black">
+                        이미 계정이 있으신가요? 로그인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <i id="alert-icon" class="fas fa-check-circle text-5xl text-green-500 mb-4"></i>
+            <h3 id="alert-title" class="text-xl font-bold mb-2">알림</h3>
+            <p id="alert-message" class="text-gray-600 mb-6">메시지</p>
+            <button onclick="closeAlertModal()" class="px-6 py-2 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition">
+                확인
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase & App Script -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
