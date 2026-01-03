@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zito - 디지털 명함 서비스</title>
+    <meta name="description" content="Zito는 관계 관리에 특화된 스마트한 디지털 명함 서비스입니다. QR, 링크, NFC로 무제한 공유하세요.">
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center space-x-8">
+                    <a href="/" class="flex items-center">
+                        <img src="/images/zito_logo_2.png" alt="Zito" class="h-6">
+                    </a>
+                    <div class="hidden md:flex items-center space-x-1">
+                        <span class="text-white font-medium px-2">플랜</span>
+                        <span class="text-gray-400">|</span>
+                        <a href="/plan-free.html" class="text-gray-300 hover:text-white px-2 py-1 text-sm">무료</a>
+                        <a href="/plan-pro.html" class="text-gray-300 hover:text-white px-2 py-1 text-sm">PRO</a>
+                        <a href="/plan-b2b.html" class="text-gray-300 hover:text-white px-2 py-1 text-sm">B2B</a>
+                    </div>
+                    <a href="/inquiry.html" class="hidden md:block text-gray-300 hover:text-white px-3 py-1">도입문의</a>
+                    <a href="/store.html" class="hidden md:block text-gray-300 hover:text-white px-3 py-1">스토어</a>
+                </div>
+                <div class="flex items-center space-x-4" id="auth-buttons">
+                    <a href="/login.html" class="text-gray-300 hover:text-white px-3 py-1" id="login-btn">로그인</a>
+                    <a href="/signup.html" class="text-gray-300 hover:text-white px-3 py-1" id="signup-btn">회원가입</a>
+                </div>
+                <div class="hidden items-center space-x-4" id="user-menu">
+                    <a href="/dashboard.html" class="hidden text-gray-300 hover:text-white px-3 py-1" id="dashboard-btn">대시보드</a>
+                    <button id="logout-btn" class="text-gray-300 hover:text-white px-3 py-1">로그아웃</button>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-white p-2">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-black border-t border-gray-800">
+            <div class="px-4 py-3 space-y-2">
+                <div class="py-2 border-b border-gray-800">
+                    <span class="text-white font-medium">플랜</span>
+                    <div class="pl-4 mt-2 space-y-1">
+                        <a href="/plan-free.html" class="block text-gray-300 hover:text-white py-1">무료</a>
+                        <a href="/plan-pro.html" class="block text-gray-300 hover:text-white py-1">PRO</a>
+                        <a href="/plan-b2b.html" class="block text-gray-300 hover:text-white py-1">B2B</a>
+                    </div>
+                </div>
+                <a href="/inquiry.html" class="block text-gray-300 hover:text-white py-2">도입문의</a>
+                <a href="/store.html" class="block text-gray-300 hover:text-white py-2">스토어</a>
+                <div class="pt-2 border-t border-gray-800 space-y-1" id="mobile-auth">
+                    <a href="/login.html" class="block text-gray-300 hover:text-white py-2">로그인</a>
+                    <a href="/signup.html" class="block text-gray-300 hover:text-white py-2">회원가입</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="pt-14">
+        <section class="relative bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white py-32 overflow-hidden">
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full filter blur-3xl"></div>
+                <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl"></div>
+            </div>
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                    나만의 디지털 명함<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Zito</span>와 함께
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto">
+                    QR, 링크, NFC로 무제한 공유하고<br>
+                    관계 관리까지 한 번에
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/signup.html" class="px-8 py-4 bg-white text-black font-semibold rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105">
+                        무료로 시작하기
+                    </a>
+                    <a href="/plan-free.html" class="px-8 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-black transition-all">
+                        플랜 비교하기
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">왜 Zito인가요?</h2>
+                    <p class="text-xl text-gray-600">Slice의 절반 가격, 하지만 관계 관리에 특화</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-gray-50 rounded-2xl p-8 hover:shadow-xl transition-all">
+                        <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-gift text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">완전 무료 공유</h3>
+                        <p class="text-gray-600">QR, 링크, NFC로 무제한 공유. 진짜 무료 디지털 명함으로 Slice 탈출 수요를 흡수합니다.</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-8 hover:shadow-xl transition-all">
+                        <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-users text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">관계 관리 특화</h3>
+                        <p class="text-gray-600">명함 교환 시 메모, 태그, 후속 알림으로 네트워킹을 체계적으로 관리하세요.</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-8 hover:shadow-xl transition-all">
+                        <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-building text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">B2B 솔루션</h3>
+                        <p class="text-gray-600">팀 대시보드, CRM 연동, 리드 관리로 명함 기반 세일즈 툴을 경험하세요.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Plan Comparison -->
+        <section class="py-24 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">플랜 비교</h2>
+                    <p class="text-xl text-gray-600">필요에 맞는 플랜을 선택하세요</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- 무료 플랜 -->
+                    <div class="bg-white rounded-2xl p-8 border-2 border-gray-200 hover:border-gray-400 transition-all">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">무료</h3>
+                            <p class="text-4xl font-bold text-gray-900 mt-4">0원</p>
+                            <p class="text-gray-500">영구 무료</p>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-green-500 mr-3"></i>명함 1장 생성</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-green-500 mr-3"></i>QR/링크/NFC 무제한 공유</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-green-500 mr-3"></i>기본 조회수 통계</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-green-500 mr-3"></i>명함첩 무제한</li>
+                        </ul>
+                        <a href="/signup.html" class="block w-full py-3 text-center bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-all">시작하기</a>
+                    </div>
+                    <!-- PRO 플랜 -->
+                    <div class="bg-white rounded-2xl p-8 border-2 border-blue-500 shadow-xl relative transform md:-translate-y-4">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">인기</span>
+                        </div>
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">PRO</h3>
+                            <p class="text-4xl font-bold text-blue-600 mt-4">2,900원</p>
+                            <p class="text-gray-500">월 / 연 32,000원</p>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-blue-500 mr-3"></i>멀티 명함 최대 5개</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-blue-500 mr-3"></i>고급 디자인/브랜딩</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-blue-500 mr-3"></i>관계 관리 & 팔로업 알림</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-blue-500 mr-3"></i>고급 통계 리포트</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-blue-500 mr-3"></i>광고 제거</li>
+                        </ul>
+                        <a href="/signup.html?plan=pro" class="block w-full py-3 text-center bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-all">PRO 시작하기</a>
+                    </div>
+                    <!-- B2B 플랜 -->
+                    <div class="bg-white rounded-2xl p-8 border-2 border-gray-200 hover:border-purple-400 transition-all">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">B2B</h3>
+                            <p class="text-4xl font-bold text-purple-600 mt-4">문의</p>
+                            <p class="text-gray-500">맞춤 견적</p>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-purple-500 mr-3"></i>회사 브랜딩 템플릿</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-purple-500 mr-3"></i>직원 명함 일괄 관리</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-purple-500 mr-3"></i>커스텀 도메인</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-purple-500 mr-3"></i>CRM 연동</li>
+                            <li class="flex items-center text-gray-600"><i class="fas fa-check text-purple-500 mr-3"></i>팀 파이프라인 관리</li>
+                        </ul>
+                        <a href="/inquiry.html" class="block w-full py-3 text-center bg-purple-600 text-white font-semibold rounded-xl hover:bg-purple-700 transition-all">도입문의</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-24 bg-gradient-to-r from-gray-900 to-black text-white">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">지금 바로 시작하세요</h2>
+                <p class="text-xl text-gray-300 mb-10">
+                    무료로 나만의 디지털 명함을 만들고<br>
+                    스마트한 네트워킹을 경험해보세요
+                </p>
+                <a href="/signup.html" class="inline-block px-10 py-4 bg-white text-black font-semibold rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105">
+                    무료 회원가입
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <img src="/images/zito_logo_2.png" alt="Zito" class="h-8 mb-4">
+                    <p class="text-sm mb-4">Zito는 디지털 명함 서비스로, 관계 관리에 특화된 스마트한 네트워킹 솔루션을 제공합니다.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="hover:text-white"><i class="fab fa-instagram text-xl"></i></a>
+                        <a href="#" class="hover:text-white"><i class="fab fa-linkedin text-xl"></i></a>
+                        <a href="#" class="hover:text-white"><i class="fab fa-youtube text-xl"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">서비스</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/plan-free.html" class="hover:text-white">무료 플랜</a></li>
+                        <li><a href="/plan-pro.html" class="hover:text-white">PRO 플랜</a></li>
+                        <li><a href="/plan-b2b.html" class="hover:text-white">B2B 플랜</a></li>
+                        <li><a href="/store.html" class="hover:text-white">스토어</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">고객지원</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/inquiry.html" class="hover:text-white">도입문의</a></li>
+                        <li><a href="#" class="hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="hover:text-white">이용약관</a></li>
+                        <li><a href="#" class="hover:text-white">개인정보처리방침</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
+                <p>&copy; 2025 Zito. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

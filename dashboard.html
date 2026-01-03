@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드 - Zito</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center space-x-8">
+                    <a href="/" class="flex items-center"><img src="/images/zito_logo_2.png" alt="Zito" class="h-6"></a>
+                    <div class="hidden md:flex items-center space-x-1">
+                        <span class="text-white font-medium px-2">플랜</span>
+                        <span class="text-gray-400">|</span>
+                        <a href="/plan-free.html" class="text-gray-300 hover:text-white px-2 py-1 text-sm">무료</a>
+                        <a href="/plan-pro.html" class="text-gray-300 hover:text-white px-2 py-1 text-sm">PRO</a>
+                        <a href="/plan-b2b.html" class="text-gray-300 hover:text-white px-2 py-1 text-sm">B2B</a>
+                    </div>
+                    <a href="/inquiry.html" class="hidden md:block text-gray-300 hover:text-white px-3 py-1">도입문의</a>
+                    <a href="/store.html" class="hidden md:block text-gray-300 hover:text-white px-3 py-1">스토어</a>
+                </div>
+                <div class="hidden items-center space-x-4" id="auth-buttons">
+                    <a href="/login.html" class="text-gray-300 hover:text-white px-3 py-1">로그인</a>
+                    <a href="/signup.html" class="text-gray-300 hover:text-white px-3 py-1">회원가입</a>
+                </div>
+                <div class="flex items-center space-x-4" id="user-menu">
+                    <a href="/dashboard.html" class="text-white px-3 py-1" id="dashboard-btn">대시보드</a>
+                    <button id="logout-btn" class="text-gray-300 hover:text-white px-3 py-1">로그아웃</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-14">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <!-- 헤더 -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">대시보드</h1>
+                <p class="text-gray-600 mt-1">명함 통계와 관계 관리를 한눈에</p>
+            </div>
+
+            <!-- 사용자 플랜 정보 -->
+            <div id="user-plan-info" class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm">현재 플랜</p>
+                        <p id="current-plan" class="text-2xl font-bold">FREE</p>
+                    </div>
+                    <a href="/plan-pro.html" id="upgrade-btn" class="px-6 py-2 bg-white text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all">업그레이드</a>
+                </div>
+            </div>
+
+            <!-- 통계 카드 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">총 조회수</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="total-views">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-eye text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-green-600 mt-3"><i class="fas fa-arrow-up mr-1"></i><span id="views-change">+0%</span> 이번 주</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">저장된 명함</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="saved-cards">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-address-book text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3">명함첩에 저장됨</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">공유 횟수</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="share-count">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-share-alt text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3">QR/링크/NFC</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">링크 클릭</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="link-clicks">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-mouse-pointer text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3">SNS/포트폴리오</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 내 명함 -->
+                <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-900">내 명함</h2>
+                        <button class="px-4 py-2 bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-all text-sm" id="create-card-btn">
+                            <i class="fas fa-plus mr-2"></i>새 명함
+                        </button>
+                    </div>
+                    <div id="my-cards-list" class="space-y-4">
+                        <div class="border border-gray-200 rounded-xl p-4 hover:border-gray-400 transition-all cursor-pointer">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-500 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900" id="card-user-name">사용자</p>
+                                        <p class="text-sm text-gray-500">기본 명함</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <button class="p-2 text-gray-400 hover:text-gray-600" title="QR 코드"><i class="fas fa-qrcode"></i></button>
+                                    <button class="p-2 text-gray-400 hover:text-gray-600" title="링크 복사"><i class="fas fa-link"></i></button>
+                                    <button class="p-2 text-gray-400 hover:text-gray-600" title="수정"><i class="fas fa-edit"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="pro-card-slots" class="hidden">
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-all cursor-pointer">
+                                <i class="fas fa-plus text-gray-400 text-2xl mb-2"></i>
+                                <p class="text-gray-500">새 명함 추가 (최대 5개)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="free-plan-notice" class="mt-6 p-4 bg-gray-50 rounded-xl">
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                            무료 플랜은 명함 1장만 생성 가능합니다. 
+                            <a href="/plan-pro.html" class="text-blue-600 underline">PRO로 업그레이드</a>하면 최대 5장까지 만들 수 있어요!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 최근 활동 & 팔로업 알림 -->
+                <div class="space-y-6">
+                    <div id="followup-section" class="bg-white rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">
+                            <i class="fas fa-bell text-blue-500 mr-2"></i>팔로업 알림
+                        </h2>
+                        <div id="followup-pro-required" class="text-center py-6">
+                            <i class="fas fa-lock text-gray-300 text-4xl mb-3"></i>
+                            <p class="text-gray-500 text-sm">PRO 플랜에서 사용 가능</p>
+                            <a href="/plan-pro.html" class="inline-block mt-3 text-blue-600 text-sm underline">업그레이드하기</a>
+                        </div>
+                        <div id="followup-list" class="hidden space-y-3"></div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">최근 조회</h2>
+                        <div id="recent-views-list" class="space-y-3">
+                            <p class="text-sm text-gray-500 text-center py-4">아직 조회 기록이 없습니다</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 명함첩 -->
+            <div class="mt-8 bg-white rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        <i class="fas fa-address-book text-green-500 mr-2"></i>명함첩
+                    </h2>
+                    <input type="text" placeholder="검색..." class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                </div>
+                <div id="contacts-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-address-card text-gray-300 text-5xl mb-4"></i>
+                        <p class="text-gray-500">아직 저장된 명함이 없습니다</p>
+                        <p class="text-gray-400 text-sm mt-1">명함을 교환하면 여기에 저장됩니다</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

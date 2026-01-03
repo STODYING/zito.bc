@@ -1,0 +1,41 @@
+[build]
+  publish = "."
+  command = "echo 'No build needed for static site'"
+
+# 환경 변수를 클라이언트에 주입하기 위한 빌드 커맨드
+# Netlify UI에서 환경 변수 설정 후 사용
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# SPA 라우팅 지원 (모든 경로를 index.html로)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Language = ["en"]}
+
+# 정적 파일 캐싱
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# 보안 헤더
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
