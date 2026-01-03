@@ -1,25 +1,28 @@
 // Firebase Configuration
-// 환경변수는 Netlify 관리자 페이지에서 설정합니다.
-// 로컬 개발 시에는 이 파일의 값을 직접 입력하거나, 
-// window.ENV 객체를 통해 설정할 수 있습니다.
-
+// Netlify Site settings → Environment variables에 등록한 값을 불러옵니다.
 const firebaseConfig = {
-    apiKey: window.ENV?.FIREBASE_API_KEY || "YOUR_FIREBASE_API_KEY",
-    authDomain: window.ENV?.FIREBASE_AUTH_DOMAIN || "YOUR_PROJECT.firebaseapp.com",
-    projectId: window.ENV?.FIREBASE_PROJECT_ID || "YOUR_PROJECT_ID",
-    storageBucket: window.ENV?.FIREBASE_STORAGE_BUCKET || "YOUR_PROJECT.appspot.com",
-    messagingSenderId: window.ENV?.FIREBASE_MESSAGING_SENDER_ID || "YOUR_MESSAGING_SENDER_ID",
-    appId: window.ENV?.FIREBASE_APP_ID || "YOUR_APP_ID"
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
 let app, auth, db;
 
 try {
-    app = firebase.initializeApp(firebaseConfig);
+    // 이미 초기화된 앱이 있는지 확인 후 초기화
+    if (!firebase.apps.length) {
+        app = firebase.initializeApp(firebaseConfig);
+    } else {
+        app = firebase.app();
+    }
+    
     auth = firebase.auth();
     db = firebase.firestore();
-    console.log('✅ Firebase 초기화 성공');
+    console.log('✅ Firebase 환경변수 로드 및 초기화 성공');
 } catch (error) {
     console.error('❌ Firebase 초기화 실패:', error);
 }
@@ -34,3 +37,5 @@ googleProvider.setCustomParameters({
 const appleProvider = new firebase.auth.OAuthProvider('apple.com');
 appleProvider.addScope('email');
 appleProvider.addScope('name');
+
+export { auth, db, googleProvider, appleProvider };
