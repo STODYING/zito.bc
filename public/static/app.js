@@ -2,22 +2,19 @@
 // Zito Web App - Firebase Authentication
 // ============================================
 
-const firebaseConfig = {
-  apiKey: "process.env.REACT_APP_FIREBASE_API_KEY",
-  authDomain: "process.env.REACT_APP_FIREBASE_AUTH_DOMAIN",
-  projectId: "process.env.REACT_APP_FIREBASE_PROJECT_ID",
-  storageBucket: "process.env.REACT_APP_FIREBASE_STORAGE_BUCKET",
-  messagingSenderId: "process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID",
-  appId: "process.env.REACT_APP_FIREBASE_APP_ID"
-};
+let auth, db;
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-    console.log("✅ Firebase Initialized with injected keys");
-}
-
-const auth = firebase.auth();
-const db = firebase.firestore();
+function initFirebase() {
+    try {
+        if (typeof firebase !== 'undefined') {
+            // 초기화가 안 되어 있을 때만 실행
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+                console.log("✅ Firebase Initialized with injected keys");
+            }
+            
+auth = firebase.auth();
+db = firebase.firestore();
     
     // 인증 상태 변경 리스너
     auth.onAuthStateChanged(handleAuthStateChange);
