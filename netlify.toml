@@ -1,14 +1,14 @@
 [build]
   publish = "."
-  # 빌드 시점에 sed 명령어를 사용하여 js 파일 내의 환경 변수 플레이스홀더를 실제 값으로 치환합니다.
+  # Netlify 환경 변수를 실제 파일에 주입하는 명령어
   command = """
     sed -i "s|process.env.REACT_APP_FIREBASE_API_KEY|${REACT_APP_FIREBASE_API_KEY}|g" ./js/firebase-config.js && \
+    sed -i "s|process.env.REACT_APP_FIREBASE_APP_ID|${REACT_APP_FIREBASE_APP_ID}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_AUTH_DOMAIN|${REACT_APP_FIREBASE_AUTH_DOMAIN}|g" ./js/firebase-config.js && \
+    sed -i "s|process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_PROJECT_ID|${REACT_APP_FIREBASE_PROJECT_ID}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_STORAGE_BUCKET|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./js/firebase-config.js && \
-    sed -i "s|process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./js/firebase-config.js && \
-    sed -i "s|process.env.REACT_APP_FIREBASE_APP_ID|${REACT_APP_FIREBASE_APP_ID}|g" ./js/firebase-config.js && \
-    echo 'Build and variable injection complete'
+    echo 'Environment variables injected successfully.'
   """
 
 [build.environment]
