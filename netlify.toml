@@ -1,7 +1,7 @@
 [build]
-  # Vite 빌드를 하지 않고 현재 폴더를 그대로 배포합니다.
+  # Vite 빌드 대신 현재 폴더(루트)를 그대로 배포합니다.
   publish = "."
-  # 빌드 명령어에서 Vite 호출을 삭제하고 sed만 실행합니다.
+  # 빌드 명령어에서 Vite 호출을 삭제하고 환경 변수를 강제 주입합니다.
   command = """
     sed -i "s|process.env.REACT_APP_FIREBASE_API_KEY|${REACT_APP_FIREBASE_API_KEY}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_APP_ID|${REACT_APP_FIREBASE_APP_ID}|g" ./js/firebase-config.js && \
@@ -9,11 +9,8 @@
     sed -i "s|process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_PROJECT_ID|${REACT_APP_FIREBASE_PROJECT_ID}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_STORAGE_BUCKET|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./js/firebase-config.js && \
-    echo '✅ Firebase 환경 변수 주입 완료!'
+    echo '✅ Firebase API Keys 주입 성공!'
   """
-
-[build.environment]
-  NODE_VERSION = "18"
 
 [[redirects]]
   from = "/*"
