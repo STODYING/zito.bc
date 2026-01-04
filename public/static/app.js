@@ -2,6 +2,16 @@
 // Zito Web App - Firebase Authentication
 // ============================================
 
+// Firebase 설정 (실제 프로젝트 설정으로 교체 필요)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
 // Firebase 초기화
 let auth, db;
 
