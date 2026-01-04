@@ -2,28 +2,33 @@
 // Zito Web App - Firebase Authentication
 // ============================================
 
+// 전역 변수 설정
 let auth, db;
 
 function initFirebase() {
     try {
         if (typeof firebase !== 'undefined') {
+            // firebase-config.js가 먼저 로드되어야 합니다.
+            if (!firebase.apps.length && window.firebaseConfig) {
+                firebase.initializeApp(window.firebaseConfig);
+            }
+            
             auth = firebase.auth();
             db = firebase.firestore();
             
-            // 인증 상태 리스너
-            auth.onAuthStateChanged(handleAuthStateChange);
-            console.log("✅ Auth & Firestore 초기화 완료");
+            if (typeof handleAuthStateChange === 'function') {
+                auth.onAuthStateChanged(handleAuthStateChange);
+            }
+            console.log("✅ Firebase App 연결 성공");
+        } else {
+            console.error("❌ Firebase SDK 로드 실패");
         }
     } catch (error) {
-        console.error("❌ 초기화 실패:", error);
+        console.error("❌ 초기화 에러:", error);
     }
 }
 
-// 모든 DOM이 로드된 후 실행
-document.addEventListener('DOMContentLoaded', () => {
-    initFirebase();
-    // 나머지 이벤트 리스너(로그인/회원가입 버튼 등) 위치
-});
+document.addEventListener('DOMContentLoaded', initFirebase);
 
 // ============================================
 // 인증 상태 관리
