@@ -2,24 +2,25 @@
 // Zito Web App - Firebase Authentication
 // ============================================
 
-// Firebase 설정 (환경 변수 사용)
+// js/firebase-config.js
 const firebaseConfig = {
-  apiKey: "process.env.REACT_APP_FIREBASE_API_KEY",
-  authDomain: "process.env.REACT_APP_FIREBASE_AUTH_DOMAIN",
-  projectId: "process.env.REACT_APP_FIREBASE_PROJECT_ID",
-  storageBucket: "process.env.REACT_APP_FIREBASE_STORAGE_BUCKET",
-  messagingSenderId: "process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID",
-  appId: "process.env.REACT_APP_FIREBASE_APP_ID"
+  // Vite 환경에서는 import.meta.env를 사용합니다.
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Firebase 초기화
-let auth, db;
-
-function initFirebase() {
-  if (typeof firebase !== 'undefined') {
+// Firebase 초기화 확인
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore();
+    console.log("✅ Firebase 초기화 완료 (Vite Env)");
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
     
     // 인증 상태 변경 리스너
     auth.onAuthStateChanged(handleAuthStateChange);
