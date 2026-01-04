@@ -1,6 +1,6 @@
 [build]
+  # 빌드 폴더를 현재 위치('.')로 잡고, 직접 sed 명령어로 값을 주입합니다.
   publish = "."
-  # 빌드 시점에 sed 명령어를 사용하여 js 파일 내부의 텍스트를 실제 환경 변수 값으로 치환합니다.
   command = """
     sed -i "s|process.env.REACT_APP_FIREBASE_API_KEY|${REACT_APP_FIREBASE_API_KEY}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_APP_ID|${REACT_APP_FIREBASE_APP_ID}|g" ./js/firebase-config.js && \
@@ -8,7 +8,7 @@
     sed -i "s|process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_PROJECT_ID|${REACT_APP_FIREBASE_PROJECT_ID}|g" ./js/firebase-config.js && \
     sed -i "s|process.env.REACT_APP_FIREBASE_STORAGE_BUCKET|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./js/firebase-config.js && \
-    echo '✅ 환경 변수가 성공적으로 주입되었습니다.'
+    echo '✅ 환경 변수 주입 완료!'
   """
 
 [build.environment]
