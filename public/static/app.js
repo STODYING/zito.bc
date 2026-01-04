@@ -11,10 +11,9 @@ const firebaseConfig = {
   appId: "process.env.REACT_APP_FIREBASE_APP_ID"
 };
 
-// Firebase 초기화 확인
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-    console.log("✅ Firebase 초기화 완료");
+    console.log("✅ Firebase Initialized with injected keys");
 }
 
 const auth = firebase.auth();
