@@ -1,6 +1,4 @@
-// Firebase Configuration
-// Netlify 환경변수에서 가져옵니다 (빌드 시 주입됨)
-// 로컬 개발 시에는 직접 값을 입력하거나, .env 파일 사용
+// Firebase Configuration - Netlify 빌드 시 실제 값으로 치환됩니다.
 
 const firebaseConfig = {
   apiKey: "process.env.REACT_APP_FIREBASE_API_KEY",
@@ -11,17 +9,21 @@ const firebaseConfig = {
   storageBucket: "process.env.REACT_APP_FIREBASE_STORAGE_BUCKET"
 };
 
-// Firebase 초기화
+// 전역 변수 선언
 let app, auth, db;
 
 function initializeFirebase() {
     try {
-        // Firebase가 이미 초기화되었는지 확인
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase SDK가 로드되지 않았습니다.');
+        }
+
         if (firebase.apps.length === 0) {
             app = firebase.initializeApp(firebaseConfig);
         } else {
             app = firebase.apps[0];
         }
+        
         auth = firebase.auth();
         db = firebase.firestore();
         
