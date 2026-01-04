@@ -4,26 +4,23 @@
 
 let auth, db;
 
-function initFirebaseApp() {
+function initApp() {
     if (typeof firebase !== 'undefined') {
-        // 전역 설정값이 로드되었는지 확인
-        const config = window.firebaseConfig;
-        if (!firebase.apps.length && config) {
-            firebase.initializeApp(config);
-        }
         auth = firebase.auth();
         db = firebase.firestore();
         
-        // 인증 상태 리스너 등록
-        auth.onAuthStateChanged(user => {
-            if (typeof handleAuthStateChange === 'function') {
-                handleAuthStateChange(user);
+        // 인증 상태 변경 감지
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log("로그인 상태:", user.email);
+            } else {
+                console.log("로그아웃 상태");
             }
         });
     }
 }
 
-document.addEventListener('DOMContentLoaded', initFirebaseApp);
+document.addEventListener('DOMContentLoaded', initApp);
 
 // ============================================
 // 인증 상태 관리
