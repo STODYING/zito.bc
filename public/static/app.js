@@ -2,9 +2,8 @@
 // Zito Web App - Firebase Authentication
 // ============================================
 
-// js/firebase-config.js
 const firebaseConfig = {
-  // Vite 환경에서는 import.meta.env를 사용합니다.
+  // Vite 환경 변수 주입 방식 적용
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
