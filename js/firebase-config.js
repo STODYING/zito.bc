@@ -5,7 +5,7 @@ const firebaseConfig = {
     projectId: "your-project-id",
     storageBucket: "your-project.appspot.com",
     messagingSenderId: "123456789",
-    appId: "1:123456789:web:abc123"
+    appId: "1:704514531976:web:e72e93066eb83b93ad353d"
 };
 
 // 전역 초기화
