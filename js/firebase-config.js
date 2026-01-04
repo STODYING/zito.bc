@@ -8,7 +8,9 @@ const firebaseConfig = {
   appId: "process.env.REACT_APP_FIREBASE_APP_ID"
 };
 
-// 전역에서 사용할 수 있도록 설정
+// 전역 변수로 선언하여 app.js에서 참조 가능하게 함
+window.firebaseConfig = firebaseConfig;
+
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
     console.log("✅ Firebase Config 로드됨");
