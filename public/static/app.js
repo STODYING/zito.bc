@@ -13,8 +13,8 @@ function initFirebase() {
                 console.log("✅ Firebase Initialized with injected keys");
             }
             
-auth = firebase.auth();
-db = firebase.firestore();
+            auth = firebase.auth();
+            db = firebase.firestore();
     
     // 인증 상태 변경 리스너
     auth.onAuthStateChanged(handleAuthStateChange);
