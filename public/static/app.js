@@ -7,21 +7,23 @@ let auth, db;
 function initFirebase() {
     try {
         if (typeof firebase !== 'undefined') {
-            // 초기화가 안 되어 있을 때만 실행
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-                console.log("✅ Firebase Initialized with injected keys");
-            }
-            
             auth = firebase.auth();
             db = firebase.firestore();
-    
-    // 인증 상태 변경 리스너
-    auth.onAuthStateChanged(handleAuthStateChange);
-  } else {
-    console.warn('Firebase SDK not loaded');
-  }
+            
+            // 인증 상태 리스너
+            auth.onAuthStateChanged(handleAuthStateChange);
+            console.log("✅ Auth & Firestore 초기화 완료");
+        }
+    } catch (error) {
+        console.error("❌ 초기화 실패:", error);
+    }
 }
+
+// 모든 DOM이 로드된 후 실행
+document.addEventListener('DOMContentLoaded', () => {
+    initFirebase();
+    // 나머지 이벤트 리스너(로그인/회원가입 버튼 등) 위치
+});
 
 // ============================================
 // 인증 상태 관리
