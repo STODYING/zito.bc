@@ -3,12 +3,12 @@
 // 로컬 개발 시에는 직접 값을 입력하거나, .env 파일 사용
 
 const firebaseConfig = {
-    apiKey: window.FIREBASE_API_KEY || "AIzaSyExample123456789",
-    authDomain: window.FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
-    projectId: window.FIREBASE_PROJECT_ID || "your-project-id",
-    storageBucket: window.FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
-    messagingSenderId: window.FIREBASE_MESSAGING_SENDER_ID || "123456789",
-    appId: window.FIREBASE_APP_ID || "1:123456789:web:abc123"
+  apiKey: "process.env.REACT_APP_FIREBASE_API_KEY",
+  appId: "process.env.REACT_APP_FIREBASE_APP_ID",
+  authDomain: "process.env.REACT_APP_FIREBASE_AUTH_DOMAIN",
+  messagingSenderId: "process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID",
+  projectId: "process.env.REACT_APP_FIREBASE_PROJECT_ID",
+  storageBucket: "process.env.REACT_APP_FIREBASE_STORAGE_BUCKET"
 };
 
 // Firebase 초기화
