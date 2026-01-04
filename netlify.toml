@@ -1,13 +1,14 @@
 [build]
-  publish = "." # 루트 폴더를 그대로 배포
+  publish = "."
+  # 코드 내의 "예시 문자열"을 Netlify 환경 변수(${})로 직접 갈아끼웁니다.
   command = """
-    sed -i "s|window.FIREBASE_API_KEY|'${REACT_APP_FIREBASE_API_KEY}'|g" ./js/firebase-config.js && \
-    sed -i "s|window.FIREBASE_AUTH_DOMAIN|'${REACT_APP_FIREBASE_AUTH_DOMAIN}'|g" ./js/firebase-config.js && \
-    sed -i "s|window.FIREBASE_PROJECT_ID|'${REACT_APP_FIREBASE_PROJECT_ID}'|g" ./js/firebase-config.js && \
-    sed -i "s|window.FIREBASE_STORAGE_BUCKET|'${REACT_APP_FIREBASE_STORAGE_BUCKET}'|g" ./js/firebase-config.js && \
-    sed -i "s|window.FIREBASE_MESSAGING_SENDER_ID|'${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}'|g" ./js/firebase-config.js && \
-    sed -i "s|window.FIREBASE_APP_ID|'${REACT_APP_FIREBASE_APP_ID}'|g" ./js/firebase-config.js && \
-    echo '✅ Firebase 환경 변수 주입 성공!'
+    sed -i "s|AIzaSyExample123456789|${REACT_APP_FIREBASE_API_KEY}|g" ./js/firebase-config.js && \
+    sed -i "s|your-project.firebaseapp.com|${REACT_APP_FIREBASE_AUTH_DOMAIN}|g" ./js/firebase-config.js && \
+    sed -i "s|your-project-id|${REACT_APP_FIREBASE_PROJECT_ID}|g" ./js/firebase-config.js && \
+    sed -i "s|your-project.appspot.com|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./js/firebase-config.js && \
+    sed -i "s|123456789|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./js/firebase-config.js && \
+    sed -i "s|1:123456789:web:abc123|${REACT_APP_FIREBASE_APP_ID}|g" ./js/firebase-config.js && \
+    echo "✅ Firebase 정보 주입 완료"
   """
 
 [[redirects]]
