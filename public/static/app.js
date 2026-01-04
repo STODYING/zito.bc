@@ -4,23 +4,19 @@
 
 let auth, db;
 
-function initApp() {
+function initFirebase() {
     if (typeof firebase !== 'undefined') {
+        // config가 로드되었는지 확인 후 초기화
+        if (!firebase.apps.length && window.firebaseConfig) {
+            firebase.initializeApp(window.firebaseConfig);
+        }
         auth = firebase.auth();
         db = firebase.firestore();
-        
-        // 인증 상태 변경 감지
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                console.log("로그인 상태:", user.email);
-            } else {
-                console.log("로그아웃 상태");
-            }
-        });
+        console.log("✅ Firebase App 연결됨");
     }
 }
 
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', initFirebase);
 
 // ============================================
 // 인증 상태 관리
