@@ -76,13 +76,15 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px;
+            min-height: 100vh;
         }
 
         .card-viewer {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
-            align-items: start;
+            align-items: center;
+            min-height: calc(100vh - 80px);
         }
 
         @media (max-width: 968px) {
@@ -97,8 +99,6 @@
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            position: sticky;
-            top: 40px;
         }
 
         .business-card.horizontal {
@@ -440,18 +440,20 @@
                                 </div>
                             ` : ''}
 
-                            <div class="actions">
-                                ${data.email ? `
-                                    <button class="btn btn-secondary" onclick="window.location.href='mailto:${data.email}'">
-                                        ✉️ 이메일
-                                    </button>
-                                ` : ''}
-                                ${data.phone ? `
-                                    <button class="btn btn-primary" onclick="window.location.href='tel:${data.phone.replace(/[^0-9+]/g, '')}'">
-                                        📱 전화하기
-                                    </button>
-                                ` : ''}
-                            </div>
+                            ${(data.email || data.phone) ? `
+                                <div class="actions">
+                                    ${data.email ? `
+                                        <button class="btn btn-secondary" onclick="handleEmail('${data.email}')">
+                                            ✉️ 이메일
+                                        </button>
+                                    ` : ''}
+                                    ${data.phone ? `
+                                        <button class="btn btn-primary" onclick="handleCall('${data.phone}')">
+                                            📱 전화하기
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -530,6 +532,21 @@
                 </div>
             `;
         }
+
+        // 이메일 핸들러
+        function handleEmail(email) {
+            window.location.href = `mailto:${email}`;
+        }
+
+        // 전화 핸들러
+        function handleCall(phone) {
+            const cleanPhone = phone.replace(/[^0-9+]/g, '');
+            window.location.href = `tel:${cleanPhone}`;
+        }
+
+        // 전역 함수로 등록
+        window.handleEmail = handleEmail;
+        window.handleCall = handleCall;
 
         // 페이지 로드 시 실행
         document.addEventListener('DOMContentLoaded', loadCard);
