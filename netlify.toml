@@ -8,9 +8,22 @@
     sed -i "s|your-project.appspot.com|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./js/firebase-config.js && \
     sed -i "s|123456789|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./js/firebase-config.js && \
     sed -i "s|1:123456789:web:abc123|${REACT_APP_FIREBASE_APP_ID}|g" ./js/firebase-config.js && \
-    echo "✅ Firebase 정보 주입 완료"
+    sed -i "s|AIzaSyExample123456789|${REACT_APP_FIREBASE_API_KEY}|g" ./bc.html && \
+    sed -i "s|your-project.firebaseapp.com|${REACT_APP_FIREBASE_AUTH_DOMAIN}|g" ./bc.html && \
+    sed -i "s|your-project-id|${REACT_APP_FIREBASE_PROJECT_ID}|g" ./bc.html && \
+    sed -i "s|your-project.appspot.com|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./bc.html && \
+    sed -i "s|123456789|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./bc.html && \
+    sed -i "s|1:704514531976:web:e72e93066eb83b93ad353d|${REACT_APP_FIREBASE_APP_ID}|g" ./bc.html && \
+    echo "✅ Firebase 정보 주입 완료 (firebase-config.js + bc.html)"
   """
 
+# 명함 뷰어 페이지 라우팅 (우선순위 높음)
+[[redirects]]
+  from = "/bc/*"
+  to = "/bc.html"
+  status = 200
+
+# 기타 모든 경로는 index.html로
 [[redirects]]
   from = "/*"
   to = "/index.html"
