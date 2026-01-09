@@ -457,12 +457,12 @@
                             ${(data.email || data.phone) ? `
                                 <div class="actions">
                                     ${data.email ? `
-                                        <button class="btn btn-secondary" onclick="handleEmail(decodeURIComponent('${encodeURIComponent(data.email)}'))">
+                                        <button class="btn btn-secondary" id="emailBtn" data-email="${data.email.replace(/"/g, '&quot;')}">
                                             ✉️ 이메일
                                         </button>
                                     ` : ''}
                                     ${data.phone ? `
-                                        <button class="btn btn-primary" onclick="handleCall(decodeURIComponent('${encodeURIComponent(data.phone)}'))">
+                                        <button class="btn btn-primary" id="phoneBtn" data-phone="${data.phone.replace(/"/g, '&quot;')}">
                                             📱 전화하기
                                         </button>
                                     ` : ''}
@@ -474,6 +474,27 @@
             `;
 
             document.getElementById('app').innerHTML = html;
+            
+            // 이벤트 리스너 등록
+            const emailBtn = document.getElementById('emailBtn');
+            const phoneBtn = document.getElementById('phoneBtn');
+            
+            if (emailBtn) {
+                emailBtn.addEventListener('click', function() {
+                    const email = this.getAttribute('data-email');
+                    console.log('Email button clicked:', email);
+                    window.location.href = 'mailto:' + email;
+                });
+            }
+            
+            if (phoneBtn) {
+                phoneBtn.addEventListener('click', function() {
+                    const phone = this.getAttribute('data-phone');
+                    console.log('Phone button clicked:', phone);
+                    const cleanPhone = phone.replace(/[^0-9+]/g, '');
+                    window.location.href = 'tel:' + cleanPhone;
+                });
+            }
         }
 
         function renderCardContent(data, isVertical) {
@@ -546,23 +567,6 @@
                 </div>
             `;
         }
-
-        // 이메일 핸들러
-        function handleEmail(email) {
-            console.log('Email clicked:', email);
-            window.location.href = 'mailto:' + email;
-        }
-
-        // 전화 핸들러
-        function handleCall(phone) {
-            console.log('Phone clicked:', phone);
-            const cleanPhone = phone.replace(/[^0-9+]/g, '');
-            window.location.href = 'tel:' + cleanPhone;
-        }
-
-        // 전역 함수로 등록
-        window.handleEmail = handleEmail;
-        window.handleCall = handleCall;
 
         // 페이지 로드 시 실행
         document.addEventListener('DOMContentLoaded', loadCard);
