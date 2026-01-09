@@ -288,6 +288,30 @@
         .btn-secondary:hover {
             background: #e0e0e0;
         }
+        
+        .btn-secondary:active {
+            background: #d0d0d0;
+        }
+
+        /* 복사 완료 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
 
         .vertical-card-content {
             display: flex;
@@ -471,6 +495,9 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- 복사 완료 토스트 -->
+                <div id="toast" class="toast">이메일이 복사되었습니다!</div>
             `;
 
             document.getElementById('app').innerHTML = html;
@@ -482,8 +509,22 @@
             if (emailBtn) {
                 emailBtn.addEventListener('click', function() {
                     const email = this.getAttribute('data-email');
-                    console.log('Email button clicked:', email);
-                    window.location.href = 'mailto:' + email;
+                    console.log('Email copy clicked:', email);
+                    
+                    // 클립보드에 복사
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(email).then(function() {
+                            console.log('Email copied successfully:', email);
+                            showToast('이메일이 복사되었습니다!');
+                        }).catch(function(err) {
+                            console.error('Failed to copy email:', err);
+                            // 폴백: textarea 방식
+                            fallbackCopyText(email);
+                        });
+                    } else {
+                        // 구형 브라우저 폴백
+                        fallbackCopyText(email);
+                    }
                 });
             }
             
@@ -494,6 +535,40 @@
                     const cleanPhone = phone.replace(/[^0-9+]/g, '');
                     window.location.href = 'tel:' + cleanPhone;
                 });
+            }
+        }
+
+        // 폴백 복사 함수 (구형 브라우저용)
+        function fallbackCopyText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                console.log('Email copied (fallback):', text);
+                showToast('이메일이 복사되었습니다!');
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                alert('이메일 복사에 실패했습니다: ' + text);
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        // 토스트 메시지 표시
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                
+                setTimeout(function() {
+                    toast.classList.remove('show');
+                }, 2000);
             }
         }
 
