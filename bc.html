@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>명함 뷰어 - Zito</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/zito_logo_2.png">
+    <link rel="apple-touch-icon" href="/images/zito_logo_2.png">
+    
     <style>
         * {
             margin: 0;
@@ -181,6 +186,15 @@
             border-radius: 16px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             padding: 32px;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            /* 스크롤바 숨기기 */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .details::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         .details h2 {
@@ -443,12 +457,12 @@
                             ${(data.email || data.phone) ? `
                                 <div class="actions">
                                     ${data.email ? `
-                                        <button class="btn btn-secondary" onclick="handleEmail('${data.email}')">
+                                        <button class="btn btn-secondary" onclick="handleEmail(decodeURIComponent('${encodeURIComponent(data.email)}'))">
                                             ✉️ 이메일
                                         </button>
                                     ` : ''}
                                     ${data.phone ? `
-                                        <button class="btn btn-primary" onclick="handleCall('${data.phone}')">
+                                        <button class="btn btn-primary" onclick="handleCall(decodeURIComponent('${encodeURIComponent(data.phone)}'))">
                                             📱 전화하기
                                         </button>
                                     ` : ''}
@@ -535,13 +549,15 @@
 
         // 이메일 핸들러
         function handleEmail(email) {
-            window.location.href = `mailto:${email}`;
+            console.log('Email clicked:', email);
+            window.location.href = 'mailto:' + email;
         }
 
         // 전화 핸들러
         function handleCall(phone) {
+            console.log('Phone clicked:', phone);
             const cleanPhone = phone.replace(/[^0-9+]/g, '');
-            window.location.href = `tel:${cleanPhone}`;
+            window.location.href = 'tel:' + cleanPhone;
         }
 
         // 전역 함수로 등록
