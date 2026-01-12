@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["5ST7KXYXLP.com.heejaelee.Zito"],
+        "paths": ["/bc/*"]
+      }
+    ]
+  }
+}
