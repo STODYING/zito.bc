@@ -404,14 +404,14 @@
 
                 const cardData = cardSnap.data();
                 
-                // 조회수 증가
-                try {
-                    await cardRef.update({
-                        viewCount: firebase.firestore.FieldValue.increment(1)
-                    });
-                } catch (error) {
-                    console.warn('조회수 증가 실패:', error);
-                }
+// 웹 전용 조회수(webViewCount) 증가
+try {
+    await cardRef.update({
+        webViewCount: firebase.firestore.FieldValue.increment(1)
+    });
+} catch (error) {
+    console.warn('웹 조회수 증가 실패 (보안 규칙 확인 필요):', error);
+}
 
                 renderCard(cardData);
             } catch (error) {
