@@ -673,7 +673,7 @@
 
                             ${(data.phone || data.email || data.website || data.address) ? `
                                 <div class="info-section">
-                                    <h3>연락처 (contact details)</h3>
+                                    <h3>연락처 contact details</h3>
                                     ${data.phone ? `
                                         <div class="info-row">
                                             <div class="info-icon">📱</div>
@@ -714,12 +714,12 @@
                                 <div class="actions">
                                     ${data.email ? `
                                         <button class="btn btn-secondary" id="emailBtn" data-email="${data.email.replace(/"/g, '&quot;')}">
-                                            ✉️ 이메일
+                                            ✉️ 이메일 E-mail
                                         </button>
                                     ` : ''}
                                     ${data.phone ? `
                                         <button class="btn btn-primary" id="phoneBtn" data-phone="${data.phone.replace(/"/g, '&quot;')}">
-                                            📱 전화하기
+                                            📱 전화하기 call
                                         </button>
                                     ` : ''}
                                 </div>
