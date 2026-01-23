@@ -88,8 +88,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
-            align-items: center;
-            min-height: calc(100vh - 80px);
+            align-items: start;
         }
 
         @media (max-width: 968px) {
@@ -104,6 +103,8 @@
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            position: sticky;
+            top: 40px;
         }
 
         .business-card.horizontal {
@@ -199,7 +200,28 @@
         .details h2 {
             font-size: 24px;
             font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        /* 직급/회사명 표시 */
+        .profile-meta {
+            font-size: 16px;
+            color: #666;
             margin-bottom: 24px;
+        }
+
+        .profile-meta .position {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .profile-meta .company {
+            color: #666;
+        }
+
+        .profile-meta .divider {
+            margin: 0 8px;
+            color: #ccc;
         }
 
         .info-section {
@@ -245,6 +267,126 @@
             line-height: 1.6;
             color: #555;
             white-space: pre-wrap;
+        }
+
+        /* About 이미지 갤러리 */
+        .about-images {
+            margin-top: 20px;
+        }
+
+        .about-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .about-image-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .about-image-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .about-image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 이미지 모달 */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .image-modal.show {
+            display: flex;
+        }
+
+        .image-modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .image-modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .image-modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            padding: 16px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .image-modal-nav:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .image-modal-nav.prev {
+            left: -60px;
+        }
+
+        .image-modal-nav.next {
+            right: -60px;
+        }
+
+        .image-modal-counter {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .image-modal-nav.prev {
+                left: 10px;
+            }
+            .image-modal-nav.next {
+                right: 10px;
+            }
         }
 
         .actions {
@@ -375,6 +517,10 @@
         }
         const db = firebase.firestore();
 
+        // 이미지 모달 상태
+        let currentImageIndex = 0;
+        let aboutImages = [];
+
         // URL에서 카드 ID 추출
         function getCardIdFromURL() {
             const path = window.location.pathname;
@@ -428,10 +574,40 @@
             document.title = `${data.name || '명함'}의 명함`;
             const isVertical = data.isVertical || false;
             const hasFullImage = data.fullCardImageURL;
+            
+            // About 이미지 배열 저장 (모달용)
+            aboutImages = data.aboutImageURLs || [];
 
             const cardHTML = hasFullImage 
                 ? `<img src="${data.fullCardImageURL}" alt="${data.name}" class="card-image">`
                 : renderCardContent(data, isVertical);
+
+            // 직급/회사명 HTML 생성
+            let profileMetaHTML = '';
+            if (data.position || data.company) {
+                const parts = [];
+                if (data.position) parts.push(`<span class="position">${data.position}</span>`);
+                if (data.company) parts.push(`<span class="company">${data.company}</span>`);
+                profileMetaHTML = `<div class="profile-meta">${parts.join('<span class="divider">|</span>')}</div>`;
+            }
+
+            // About 이미지 갤러리 HTML 생성
+            let aboutImagesHTML = '';
+            if (aboutImages.length > 0) {
+                const imagesGridHTML = aboutImages.map((url, index) => `
+                    <div class="about-image-item" onclick="openImageModal(${index})">
+                        <img src="${url}" alt="About 이미지 ${index + 1}" loading="lazy">
+                    </div>
+                `).join('');
+                
+                aboutImagesHTML = `
+                    <div class="about-images">
+                        <div class="about-images-grid">
+                            ${imagesGridHTML}
+                        </div>
+                    </div>
+                `;
+            }
 
             const html = `
                 <div class="container">
@@ -443,6 +619,7 @@
 
                         <div class="details">
                             <h2>${data.name || '이름 없음'}</h2>
+                            ${profileMetaHTML}
 
                             ${(data.phone || data.email || data.website || data.address) ? `
                                 <div class="info-section">
@@ -474,11 +651,12 @@
                                 </div>
                             ` : ''}
 
-                            ${data.subtitle || data.about ? `
+                            ${data.subtitle || data.about || aboutImages.length > 0 ? `
                                 <div class="info-section">
                                     <h3>About</h3>
                                     ${data.subtitle ? `<h4 style="margin-bottom: 12px; color: #666; font-weight: 600;">${data.subtitle}</h4>` : ''}
                                     ${data.about ? `<div class="about-content">${data.about}</div>` : ''}
+                                    ${aboutImagesHTML}
                                 </div>
                             ` : ''}
 
@@ -497,6 +675,23 @@
                                 </div>
                             ` : ''}
                         </div>
+                    </div>
+                </div>
+                
+                <!-- 이미지 모달 -->
+                <div id="imageModal" class="image-modal" onclick="closeImageModal(event)">
+                    <div class="image-modal-content" onclick="event.stopPropagation()">
+                        <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
+                        ${aboutImages.length > 1 ? `
+                            <button class="image-modal-nav prev" onclick="navigateImage(-1)">&#10094;</button>
+                            <button class="image-modal-nav next" onclick="navigateImage(1)">&#10095;</button>
+                        ` : ''}
+                        <img id="modalImage" src="" alt="About 이미지">
+                        ${aboutImages.length > 1 ? `
+                            <div class="image-modal-counter">
+                                <span id="imageCounter">1</span> / ${aboutImages.length}
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
                 
@@ -534,6 +729,56 @@
                     window.location.href = 'tel:' + cleanPhone;
                 });
             }
+
+            // 키보드 이벤트 (모달 네비게이션)
+            document.addEventListener('keydown', function(e) {
+                const modal = document.getElementById('imageModal');
+                if (modal && modal.classList.contains('show')) {
+                    if (e.key === 'Escape') closeImageModal();
+                    if (e.key === 'ArrowLeft') navigateImage(-1);
+                    if (e.key === 'ArrowRight') navigateImage(1);
+                }
+            });
+        }
+
+        // 이미지 모달 열기
+        function openImageModal(index) {
+            if (aboutImages.length === 0) return;
+            
+            currentImageIndex = index;
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const counter = document.getElementById('imageCounter');
+            
+            modalImage.src = aboutImages[currentImageIndex];
+            if (counter) counter.textContent = currentImageIndex + 1;
+            
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 이미지 모달 닫기
+        function closeImageModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // 이미지 네비게이션
+        function navigateImage(direction) {
+            if (aboutImages.length <= 1) return;
+            
+            currentImageIndex += direction;
+            if (currentImageIndex < 0) currentImageIndex = aboutImages.length - 1;
+            if (currentImageIndex >= aboutImages.length) currentImageIndex = 0;
+            
+            const modalImage = document.getElementById('modalImage');
+            const counter = document.getElementById('imageCounter');
+            
+            modalImage.src = aboutImages[currentImageIndex];
+            if (counter) counter.textContent = currentImageIndex + 1;
         }
 
         // 폴백 복사 함수
