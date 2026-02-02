@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>명함 뷰어 - Zito</title>
+    <title>__OG_TITLE__ - Zito</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <link rel="apple-touch-icon" href="/images/favicon.png">
     
-    <!-- OG 메타태그 (기본값, JS로 업데이트됨) -->
+    <!-- OG 메타태그 (SSR로 치환됨) -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="명함 뷰어 - Zito" id="og-title">
-    <meta property="og:description" content="디지털 명함을 확인하세요" id="og-description">
-    <meta property="og:image" content="" id="og-image">
-    <meta property="og:url" content="" id="og-url">
+    <meta property="og:title" content="__OG_TITLE__" id="og-title">
+    <meta property="og:description" content="__OG_DESCRIPTION__" id="og-description">
+    <meta property="og:image" content="__OG_IMAGE__" id="og-image">
+    <meta property="og:url" content="__OG_URL__" id="og-url">
+    <link rel="canonical" href="__OG_URL__">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="명함 뷰어 - Zito" id="twitter-title">
-    <meta name="twitter:description" content="디지털 명함을 확인하세요" id="twitter-description">
-    <meta name="twitter:image" content="" id="twitter-image">
+    <meta name="twitter:title" content="__OG_TITLE__" id="twitter-title">
+    <meta name="twitter:description" content="__OG_DESCRIPTION__" id="twitter-description">
+    <meta name="twitter:image" content="__OG_IMAGE__" id="twitter-image">
     
     <style>
         /* [스타일 시트] 사용자의 디자인 코드 완벽 유지 */
@@ -88,7 +89,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // [Firebase 설정] 보내주신 설정값을 그대로 적용했습니다.
+        // [Firebase 설정]
         const firebaseConfig = {
             apiKey: "AIzaSyExample123456789",
             authDomain: "your-project.firebaseapp.com",
@@ -115,14 +116,12 @@
          */
         async function logView(cardId, data) {
             try {
-                // 플랜 정보 확인 (없으면 생성 안함)
                 if (!data.ownerPlan || !data.ownerEnterprisePlan) return;
-                // 무료 유저는 기록 제외
                 if (data.ownerPlan === "FREE" && data.ownerEnterprisePlan === "NONE") return;
 
                 const now = new Date();
                 const expire = new Date();
-                expire.setDate(now.getDate() + 365); // 1년 뒤
+                expire.setDate(now.getDate() + 365);
 
                 await db.collection("users").doc(data.ownerUID).collection("viewLogs").add({
                     cardId: cardId,
@@ -138,7 +137,7 @@
         }
 
         /**
-         * 링크 미리보기 및 메타태그 업데이트
+         * 클라이언트 사이드 업데이트 (이미 SSR로 되어있지만, 더 부드러운 전환을 위해 유지)
          */
         function updateOG(data) {
             const name = data.name || "Zito";
@@ -147,16 +146,6 @@
             const img = data.fullCardImageURL || data.logoImageURL || "";
 
             document.title = title;
-            const tags = {
-                "og-title": title, "twitter-title": title,
-                "og-description": desc, "twitter-description": desc,
-                "og-image": img, "twitter-image": img,
-                "og-url": window.location.href
-            };
-            Object.entries(tags).forEach(([id, val]) => {
-                const el = document.getElementById(id);
-                if (el && val) el.setAttribute("content", val);
-            });
         }
 
         async function init() {
@@ -202,14 +191,12 @@
                                 <b>${data.position || ''}</b> 
                                 ${data.company ? `<span class="divider">|</span> ${data.company}` : ''}
                             </div>
-
                             <div class="info-section">
                                 <h3>연락처</h3>
                                 ${data.phone ? `<div class="info-row"><div class="info-text">📱 ${data.phone}</div></div>` : ''}
                                 ${data.email ? `<div class="info-row"><div class="info-text">✉️ ${data.email}</div></div>` : ''}
                                 ${data.website ? `<div class="info-row"><div class="info-text">🌐 <a href="${formatUrl(data.website)}" style="color:#000;text-decoration:none;" target="_blank">${data.website}</a></div></div>` : ''}
                             </div>
-
                             ${(data.about || aboutImages.length > 0) ? `
                                 <div class="info-section">
                                     <h3>About</h3>
@@ -220,7 +207,6 @@
                                     </div>
                                 </div>
                             ` : ''}
-
                             <div class="actions">
                                 ${data.phone ? `<button class="btn btn-primary" onclick="location.href='tel:${data.phone}'">전화하기</button>` : ''}
                                 ${data.email ? `<button class="btn btn-secondary" onclick="copyText('${data.email}')">이메일 복사</button>` : ''}
@@ -228,7 +214,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- 모달 -->
                 <div id="imgModal" class="image-modal" onclick="closeModal()">
                     <button class="image-modal-close">&times;</button>
                     <div class="image-modal-content"><img id="modalImg"></div>
@@ -254,6 +239,7 @@
         function formatUrl(u) { return u.startsWith('http') ? u : 'https://' + u; }
         function getTextColor(h) { 
             const hex = h.replace('#','');
+            if(hex.length < 6) return '#fff';
             const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
             return (r*0.299 + g*0.587 + b*0.114) > 186 ? '#000' : '#fff';
         }
