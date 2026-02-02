@@ -422,11 +422,20 @@
 
         async function logView(cardId, data) {
             try {
-                if (!data.ownerPlan || !data.ownerEnterprisePlan) return;
-                if (data.ownerPlan === "FREE" && data.ownerEnterprisePlan === "NONE") return;
+                // 1. 필수 필드(ownerUID) 확인
+                if (!data.ownerUID) return;
+
+                // 2. 플랜 체크 (데이터가 있을 경우에만 수행, 대소문자 구분 안함)
+                const plan = (data.ownerPlan || "").toUpperCase();
+                const ePlan = (data.ownerEnterprisePlan || "").toUpperCase();
+
+                // Swift 로직과 동일: FREE 유저이면서 기업 플랜도 없을 때만 스킵
+                if (plan === "FREE" && (ePlan === "NONE" || !ePlan)) return;
+
                 const now = new Date();
                 const expire = new Date();
                 expire.setDate(now.getDate() + 365);
+
                 await db.collection("users").doc(data.ownerUID).collection("viewLogs").add({
                     cardId: cardId,
                     platform: "web",
@@ -437,7 +446,7 @@
                     expireAt: firebase.firestore.Timestamp.fromDate(expire),
                     visitorInfo: { userAgent: navigator.userAgent, language: navigator.language }
                 });
-            } catch (e) { }
+            } catch (e) { console.warn("로그 기록 실패:", e); }
         }
 
         function updateOG(data) {
