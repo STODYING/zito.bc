@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  # 코드 내의 "예시 문자열"을 Netlify 환경 변수(${})로 직접 갈아끼웁니다.
+  # [보안] 깃허브에는 변수만 남기고, 배포 시점에 Netlify 환경변수로 실제 정보를 주입합니다.
   command = """
     sed -i "s|AIzaSyExample123456789|${REACT_APP_FIREBASE_API_KEY}|g" ./js/firebase-config.js && \
     sed -i "s|your-project.firebaseapp.com|${REACT_APP_FIREBASE_AUTH_DOMAIN}|g" ./js/firebase-config.js && \
@@ -8,22 +8,21 @@
     sed -i "s|your-project.appspot.com|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./js/firebase-config.js && \
     sed -i "s|123456789|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./js/firebase-config.js && \
     sed -i "s|1:123456789:web:abc123|${REACT_APP_FIREBASE_APP_ID}|g" ./js/firebase-config.js && \
-    sed -i "s|AIzaSyExample123456789|${REACT_APP_FIREBASE_API_KEY}|g" ./bc.html && \
-    sed -i "s|your-project.firebaseapp.com|${REACT_APP_FIREBASE_AUTH_DOMAIN}|g" ./bc.html && \
-    sed -i "s|your-project-id|${REACT_APP_FIREBASE_PROJECT_ID}|g" ./bc.html && \
-    sed -i "s|your-project.appspot.com|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./bc.html && \
-    sed -i "s|123456789|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./bc.html && \
-    sed -i "s|1:704514531976:web:e72e93066eb83b93ad353d|${REACT_APP_FIREBASE_APP_ID}|g" ./bc.html && \
-    echo "✅ Firebase 정보 주입 완료 (firebase-config.js + bc.html)"
+    if [ -f "./bc.html" ]; then \
+      sed -i "s|AIzaSyExample123456789|${REACT_APP_FIREBASE_API_KEY}|g" ./bc.html && \
+      sed -i "s|your-project.firebaseapp.com|${REACT_APP_FIREBASE_AUTH_DOMAIN}|g" ./bc.html && \
+      sed -i "s|your-project-id|${REACT_APP_FIREBASE_PROJECT_ID}|g" ./bc.html && \
+      sed -i "s|your-project.appspot.com|${REACT_APP_FIREBASE_STORAGE_BUCKET}|g" ./bc.html && \
+      sed -i "s|123456789|${REACT_APP_FIREBASE_MESSAGING_SENDER_ID}|g" ./bc.html && \
+      sed -i "s|1:704514531976:web:e72e93066eb83b93ad353d|${REACT_APP_FIREBASE_APP_ID}|g" ./bc.html; \
+    fi && \
+    # ✅ 핵심: /bc/* 경로를 Firebase 서버(SSR)로 연결하되, 카드 ID(?id=:splat)를 정확히 전달합니다.
+    # 깃허브에는 함수 주소가 남지 않도록 동적으로 생성합니다.
+    echo "/bc/* https://asia-northeast3-${REACT_APP_FIREBASE_PROJECT_ID}.cloudfunctions.net/renderCardViewer?id=:splat 200!" > _redirects && \
+    echo "✅ Firebase 정보 주입 및 SSR 프록시 생성 완료"
   """
 
-# 명함 뷰어 페이지 라우팅 (우선순위 높음)
-[[redirects]]
-  from = "/bc/*"
-  to = "/bc.html"
-  status = 200
-
-# 기타 모든 경로는 index.html로
+# 기타 모든 경로는 index.html로 (SPA 라우팅)
 [[redirects]]
   from = "/*"
   to = "/index.html"
