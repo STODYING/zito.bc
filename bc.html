@@ -426,8 +426,12 @@
          */
         async function logView(cardId, data) {
             try {
-                if (!data.ownerPlan || !data.ownerEnterprisePlan) return;
-                if (data.ownerPlan === "FREE" && data.ownerEnterprisePlan === "NONE") return;
+                if (!data.ownerUID) return;
+
+                const plan = (data.ownerPlan || "").toUpperCase();
+                const ePlan = (data.ownerEnterprisePlan || "").toUpperCase();
+
+                if (plan === "FREE" && (ePlan === "NONE" || !ePlan)) return;
 
                 const now = new Date();
                 const expire = new Date();
