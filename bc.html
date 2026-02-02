@@ -9,6 +9,19 @@
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <link rel="apple-touch-icon" href="/images/favicon.png">
     
+    <!-- OG 메타태그 (동적으로 업데이트됨) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="명함 뷰어 - Zito" id="og-title">
+    <meta property="og:description" content="디지털 명함을 확인하세요" id="og-description">
+    <meta property="og:image" content="" id="og-image">
+    <meta property="og:url" content="" id="og-url">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="명함 뷰어 - Zito" id="twitter-title">
+    <meta name="twitter:description" content="디지털 명함을 확인하세요" id="twitter-description">
+    <meta name="twitter:image" content="" id="twitter-image">
+    
     <style>
         * {
             margin: 0;
@@ -578,6 +591,102 @@
             return match ? match[1] : null;
         }
 
+        /**
+         * 웹 조회 로그 기록 함수 (Firebase v8 SDK 버전)
+         * 프리미엄 유저의 명함만 조회 로그를 기록합니다.
+         */
+        async function logWebView(cardId, cardData) {
+            try {
+                // 소유자의 플랜 확인 (정보가 없으면 기록 중단)
+                const ownerPlan = cardData.ownerPlan;
+                const ownerEnterprisePlan = cardData.ownerEnterprisePlan;
+                
+                if (!ownerPlan || !ownerEnterprisePlan) {
+                    console.log("⏭️ 플랜 정보 없음 - 조회 로그 기록 생략");
+                    return;
+                }
+
+                // 프리미엄 유저(FREE & NONE 조합이 아닌 경우)만 기록
+                if (ownerPlan === "FREE" && ownerEnterprisePlan === "NONE") {
+                    console.log("⏭️ 무료 플랜 사용자 - 조회 로그 기록 생략");
+                    return;
+                }
+
+                const now = new Date();
+                
+                // 1년 뒤(365일) 만료일 계산
+                const expireDate = new Date();
+                expireDate.setDate(now.getDate() + 365);
+
+                // viewLogs 컬렉션에 로그 추가
+                await db.collection("users")
+                    .doc(cardData.ownerUID)
+                    .collection("viewLogs")
+                    .add({
+                        cardId: cardId,
+                        platform: "web",
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(), // 서버 시각
+                        date: firebase.firestore.Timestamp.fromDate(now), // 로컬 시각 (통계용)
+                        hour: now.getHours(),          // 시간대 통계 (0-23)
+                        dayOfWeek: now.getDay() + 1,   // 요일 통계 (1:일, 7:토)
+                        expireAt: firebase.firestore.Timestamp.fromDate(expireDate), // 1년 후 자동 삭제
+                        visitorInfo: {
+                            userAgent: navigator.userAgent,
+                            language: navigator.language
+                        }
+                    });
+
+                console.log("✅ 조회 로그 기록 성공!");
+            } catch (error) {
+                console.warn("⚠️ 조회 로그 기록 실패:", error);
+                // 로그 기록 실패해도 명함 보기에는 영향 없음
+            }
+        }
+
+        /**
+         * OG 메타태그 동적 업데이트 함수
+         * 링크 미리보기에 명함 이미지와 "~의 명함" 텍스트를 표시합니다.
+         */
+        function updateOGMetaTags(cardData) {
+            const name = cardData.name || '명함';
+            const title = `${name}의 명함`;
+            const description = cardData.company 
+                ? `${cardData.company}${cardData.position ? ' | ' + cardData.position : ''}`
+                : (cardData.position || '디지털 명함을 확인하세요');
+            
+            // 명함 이미지 URL 결정 (우선순위: fullCardImageURL > logoImageURL > 기본 이미지)
+            const imageUrl = cardData.fullCardImageURL 
+                || cardData.logoImageURL 
+                || '/images/default-card-og.png';
+            
+            const currentUrl = window.location.href;
+
+            // 페이지 타이틀 업데이트
+            document.title = title;
+
+            // OG 메타태그 업데이트
+            const ogTitle = document.getElementById('og-title');
+            const ogDescription = document.getElementById('og-description');
+            const ogImage = document.getElementById('og-image');
+            const ogUrl = document.getElementById('og-url');
+            
+            if (ogTitle) ogTitle.setAttribute('content', title);
+            if (ogDescription) ogDescription.setAttribute('content', description);
+            if (ogImage) ogImage.setAttribute('content', imageUrl);
+            if (ogUrl) ogUrl.setAttribute('content', currentUrl);
+
+            // Twitter Card 메타태그 업데이트
+            const twitterTitle = document.getElementById('twitter-title');
+            const twitterDescription = document.getElementById('twitter-description');
+            const twitterImage = document.getElementById('twitter-image');
+            
+            if (twitterTitle) twitterTitle.setAttribute('content', title);
+            if (twitterDescription) twitterDescription.setAttribute('content', description);
+            if (twitterImage) twitterImage.setAttribute('content', imageUrl);
+
+            console.log("✅ OG 메타태그 업데이트 완료:", { title, description, imageUrl });
+        }
+
         // 명함 데이터 로드
         async function loadCard() {
             const cardId = getCardIdFromURL();
@@ -598,7 +707,10 @@
 
                 const cardData = cardSnap.data();
                 
-                // 웹 전용 조회수(webViewCount) 증가 - 수정된 버전
+                // OG 메타태그 업데이트 (링크 미리보기용)
+                updateOGMetaTags(cardData);
+                
+                // 웹 전용 조회수(webViewCount) 증가
                 const currentWebViewCount = cardData.webViewCount || 0;
                 
                 try {
@@ -611,6 +723,9 @@
                     // 조회수 증가 실패해도 명함은 보여줌
                 }
 
+                // 웹 조회 로그 기록 (프리미엄 유저만)
+                await logWebView(cardId, cardData);
+
                 renderCard(cardData);
             } catch (error) {
                 console.error('Error loading card:', error);
@@ -620,8 +735,6 @@
 
         // 명함 렌더링
         function renderCard(data) {
-            // 페이지 타이틀 변경
-            document.title = `${data.name || '명함'}의 명함`;
             const isVertical = data.isVertical || false;
             const hasFullImage = data.fullCardImageURL;
             
